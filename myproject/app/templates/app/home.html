@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetas de Cocina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+
+        .search-form {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .search-input {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .search-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-button:hover {
+            background: #2980b9;
+        }
+
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .recipe-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .recipe-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .recipe-content {
+            padding: 1.5rem;
+        }
+
+        .recipe-title {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .recipe-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: #7f8c8d;
+        }
+
+        .ingredients-list {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .ingredients-list li {
+            padding: 0.3rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #e74c3c;
+            padding: 2rem;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍳 Recetas de Cocina</h1>
+
+        <form class="search-form" method="GET">
+            <input type="text" name="q" class="search-input" placeholder="Buscar recetas..." value="{{ request.GET.q }}">
+            <input type="number" name="prep_time" class="search-input" placeholder="Tiempo preparación (min)">
+            <input type="number" name="cook_time" class="search-input" placeholder="Tiempo cocción (min)">
+            <input type="text" name="ingredient" class="search-input" placeholder="Ingrediente">
+            <button type="submit" class="search-button">Buscar 🔍</button>
+        </form>
+
+        {% if message %}
+            <div class="no-results">{{ message }}</div>
+        {% endif %}
+
+        <div class="recipe-grid">
+            {% for recipe in recipes %}
+                <div class="recipe-card">
+                    {% if recipe.image %}
+                        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-image">
+                    {% endif %}
+                    <div class="recipe-content">
+                        <h2 class="recipe-title">{{ recipe.title }}</h2>
+                        <div class="recipe-meta">
+                            <span>⏱ {{ recipe.prep_time }} min</span>
+                            <span>🔥 {{ recipe.cook_time }} min</span>
+                        </div>
+                        <ul class="ingredients-list">
+                            {% for ri in recipe.recipe_ingredients.all %}
+                                <li>{{ ri.quantity }} {{ ri.ingredient.name }}</li>
+                            {% endfor %}
+                        </ul>
+                        <div class="recipe-meta">
+                            <span>📌 {{ recipe.category.name }}</span>
+                            <span>🌍 {{ recipe.cuisine.name }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="no-results">No se encontraron recetas 😞</div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
