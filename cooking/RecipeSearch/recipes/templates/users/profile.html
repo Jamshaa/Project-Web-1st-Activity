@@ -1,0 +1,68 @@
+{% extends 'recipes/base.html' %}
+{% block title %}Profile{% endblock %}
+
+{% block search_container %}{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+  <h2>Your Profile</h2>
+  <div class="bio-container">
+    <label for="bio">Bio:</label>
+    <textarea id="bio" name="bio" disabled>{{ user.profile.bio }}</textarea>
+    <button id="edit-btn" type="button">Edit</button>
+  </div>
+</div>
+
+<script>
+  // Función para obtener el token CSRF de las cookies
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const editBtn = document.getElementById('edit-btn');
+  const bioField = document.getElementById('bio');
+
+  editBtn.addEventListener('click', () => {
+    if (bioField.disabled) {
+      bioField.disabled = false;
+      editBtn.textContent = 'Save Changes';
+      bioField.focus();
+    } else {
+      const bioData = bioField.value;
+      const csrfToken = getCookie('csrftoken');
+      fetch("{% url 'recipes:update_bio' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken
+        },
+        body: JSON.stringify({ bio: bioData })
+      })
+      .then(response => {
+        if (response.ok) {
+          bioField.disabled = true;
+          editBtn.textContent = 'Edit';
+          window.location.href = "{% url 'recipes:profile' %}";
+        } else {
+          alert('Error saving bio. Please try again.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      });
+    }
+  });
+</script>
+{% endblock %}
