@@ -1,0 +1,18 @@
+{% extends 'recipes/base.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block search_container %}{% endblock %}
+
+{% block search %}{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Register</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Register</button>
+    </form>
+</div>
+{% endblock %}
