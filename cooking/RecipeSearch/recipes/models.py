@@ -7,6 +7,7 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
 class Recipe(models.Model):
     spoonacular_id = models.IntegerField(unique=True)
     title = models.CharField(max_length=100)
@@ -16,8 +17,26 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.title
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
+
     def __str__(self):
         return f'{self.user.username} Profile'
+
+class Ingredient(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+class UserPantry(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    expiration_date = models.DateField(null=True, blank=True)
+    image_url = models.URLField(blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s pantry item: {self.ingredient.name}"

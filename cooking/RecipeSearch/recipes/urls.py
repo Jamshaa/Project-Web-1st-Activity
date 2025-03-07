@@ -1,5 +1,4 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
 from . import views
 
 app_name = 'recipes'
@@ -7,10 +6,13 @@ app_name = 'recipes'
 urlpatterns = [
     path('', views.home, name='home'),
     path('register/', views.register, name='register'),
-    path('login/', auth_views.LoginView.as_view(template_name='recipes/login.html'), name='login'),
+    path('login/', views.login_view, name='login'),
     path('logout/', views.user_logout, name='logout'),
     path('search/', views.recipe_search, name='recipe_search'),
     path('recipe/<int:recipe_id>/', views.recipe_detail, name='recipe_detail'),
     path('profile/', views.profile, name='profile'),
-    path("update-bio/", views.update_bio, name="update_bio")
+    path('update-bio/', views.update_bio, name='update_bio'),
+    path('pantry/', views.pantry, name='pantry'),
+    path('add-ingredient/', views.add_pantry_item, name='add_pantry_item'),
+    path('remove-ingredient/<int:item_id>/', views.remove_pantry_item, name='remove_pantry_item'),
 ]
