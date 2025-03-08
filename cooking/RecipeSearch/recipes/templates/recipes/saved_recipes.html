@@ -1,0 +1,48 @@
+{% extends 'recipes/base.html' %}
+
+{% block title %}Your Saved Recipes{% endblock %}
+
+{% block content %}
+    <div class="saved-recipes-container">
+        <h2>Your Saved Recipes</h2>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if saved_recipes %}
+            <div class="recipe-grid">
+                {% for saved in saved_recipes %}
+                    <div class="recipe-card">
+                        <a href="{% url 'recipes:recipe_detail' saved.recipe.spoonacular_id %}">
+                            {% if saved.recipe.image %}
+                                <img src="{{ saved.recipe.image }}" alt="{{ saved.recipe.title }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/150" alt="Default Image">
+                            {% endif %}
+                            <div class="recipe-info">
+                                <h3>{{ saved.recipe.title }}</h3>
+                            </div>
+                        </a>
+                        <div class="recipe-actions">
+                            <form action="{% url 'recipes:remove_saved_recipe' saved.recipe.spoonacular_id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="remove-button">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-recipes-message">
+                <p>No saved recipes yet. Start adding some!</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

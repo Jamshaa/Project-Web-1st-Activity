@@ -3,18 +3,35 @@
 {% block title %}Recipe Detail{% endblock %}
 
 {% block content %}
-    {% if recipe %}
-        <h2>{{ recipe.title }}</h2>
-        {% if recipe.image %}
-            <img src="{{ recipe.image }}" alt="{{ recipe.title }}">
-        {% endif %}
-        <p><strong>Ready in:</strong> {{ recipe.readyInMinutes }} minutes</p>
-        <p><strong>Servings:</strong> {{ recipe.servings }}</p>
-        <h3>Instructions:</h3>
-        <div>
-            {{ recipe.instructions|safe }}
-        </div>
-    {% else %}
-        <p>Recipe details could not be loaded.</p>
+<div class="recipe-detail">
+    <h2>{{ recipe.title }}</h2>
+    {% if recipe.image %}
+        <img src="{{ recipe.image }}" alt="{{ recipe.title }}">
     {% endif %}
+    <p><strong>Instructions:</strong></p>
+    <div>{{ recipe.instructions|safe }}</div>
+    {% if user.is_authenticated %}
+        <button id="save-recipe" data-recipe-id="{{ recipe.spoonacular_id }}">Save Recipe</button>
+    {% else %}
+        <p><a href="{% url 'recipes:login' %}">Log in</a> to save this recipe.</p>
+    {% endif %}
+</div>
+
+<script>
+document.getElementById('save-recipe')?.addEventListener('click', function() {
+    const recipeId = this.getAttribute('data-recipe-id');
+    fetch(`/recipe/${recipeId}/save/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+    })
+    .catch(error => console.error('Error:', error));
+});
+</script>
 {% endblock %}
