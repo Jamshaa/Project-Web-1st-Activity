@@ -4,11 +4,13 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegisterForm, ProfileForm
-from .models import Recipe
+from .forms import UserRegisterForm, ProfileForm, UserPantryForm
+from .models import Recipe, UserPantry, Ingredient
 import requests
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.core.files.storage import FileSystemStorage
+
 def home(request):
     """Página principal con formulario de búsqueda"""
     return render(request, 'recipes/home.html', {'current_page': 'home'})
@@ -98,4 +100,38 @@ def update_bio(request):
         request.user.profile.bio = data.get("bio", "")
         request.user.profile.save()
         return JsonResponse({"message": "Bio updated successfully"})
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+@login_required
+def pantry(request):
+    pantry_items = UserPantry.objects.filter(user=request.user).select_related('ingredient')
+    return render(request, 'recipes/pantry.html', {'pantry_items': pantry_items, 'current_page': 'pantry'})
+
+@login_required
+def add_pantry_item(request):
+    if request.method == 'POST':
+        ingredient_name = request.POST.get('ingredient_name')
+        expiration_date = request.POST.get('expiration_date')
+        image = request.FILES.get('image')
+
+        if ingredient_name and expiration_date:
+            ingredient, created = Ingredient.objects.get_or_create(name=ingredient_name)
+            pantry_item = UserPantry(
+                user=request.user,
+                ingredient=ingredient,
+                expiration_date=expiration_date
+            )
+            if image:
+                fs = FileSystemStorage()
+                filename = fs.save(image.name, image)
+                pantry_item.image_url = fs.url(filename)
+            pantry_item.save()
+            return redirect('recipes:pantry')
+    return redirect('recipes:pantry')
+
+@login_required
+def remove_pantry_item(request, item_id):
+    if request.method == 'POST':
+        UserPantry.objects.filter(id=item_id, user=request.user).delete()
+        return JsonResponse({"message": "Item removed successfully"})
     return JsonResponse({"error": "Invalid request"}, status=400)

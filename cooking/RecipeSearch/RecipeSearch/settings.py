@@ -71,7 +71,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "recipes" / "static"]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 SPOONACULAR_API_KEY = '366df8cb3a0f4e65bd80ab09919434f4'
 SPOONACULAR_SEARCH_URL = 'https://api.spoonacular.com/recipes/complexSearch'
