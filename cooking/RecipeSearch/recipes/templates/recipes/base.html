@@ -19,6 +19,7 @@
             <ul>
                 {% if user.is_authenticated %}
                     <li>Welcome, {{ user.username }}</li>
+                    <li><a href="{% url 'recipes:saved_recipes' %}" class="btn btn-primary">Saved Recipes</a></li>
                     <li><a href="{% url 'recipes:profile' %}">Profile</a></li>
                     <li><a href="{% url 'recipes:logout' %}">Logout</a></li>
                 {% else %}

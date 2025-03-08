@@ -15,4 +15,7 @@ urlpatterns = [
     path('pantry/', views.pantry, name='pantry'),
     path('add-ingredient/', views.add_pantry_item, name='add_pantry_item'),
     path('remove-ingredient/<int:item_id>/', views.remove_pantry_item, name='remove_pantry_item'),
+    path('recipe/<int:recipe_id>/save/', views.save_recipe, name='save_recipe'),
+    path('recipe/<int:recipe_id>/remove/', views.remove_saved_recipe, name='remove_saved_recipe'),
+    path('saved-recipes/', views.saved_recipes, name='saved_recipes'),  # Nueva ruta
 ]

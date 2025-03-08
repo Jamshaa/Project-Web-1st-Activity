@@ -23,7 +23,7 @@ class Profile(models.Model):
     bio = models.TextField(blank=True)
 
     def __str__(self):
-        return f'{self.user.username} Profile'
+        return f"{self.user.username} Profile"
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -40,3 +40,14 @@ class UserPantry(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s pantry item: {self.ingredient.name}"
+
+class SavedRecipe(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_recipes')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='saved_by')
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'recipe')
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.recipe.title}"
