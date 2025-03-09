@@ -23,7 +23,7 @@ This is a Django-based web application that allows users to search for recipes, 
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/Jamshaa/Prac1-Models.git
+   git clone https://github.com/Jamshaa/Project-Web-1st-Activity
    python -m venv venv # On Windows:
    python3 -m venv venv  # On MAC
    source venv/bin/activate # Both
@@ -47,10 +47,10 @@ This will build and start the application along with any necessary dependencies.
 
 ## Authors
 
-- Wissam Amer  
+- Wissam Amer @wissamamer 
 - Miriam Robert Ibrahim  
-- Matteo Cataneo  
-- Ibrahim Memic   
+- Matteo Cataneo @Matyeo004
+- Ibrahim Memic @Ibe1999
 - Alessandro 
-- Hamza @jamshaa (hmzxaa21@gmail.com)
+- Hamza @jamshaa 
 
