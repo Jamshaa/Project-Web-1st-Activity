@@ -27,6 +27,7 @@ This is a Django-based web application that allows users to search for recipes, 
    python -m venv venv # On Windows:
    python3 -m venv venv  # On MAC
    source venv/bin/activate # Both
+   cd cooking
    pip install -r requirements.txt
    cd recipe-search
    python manage.py makemigrations
