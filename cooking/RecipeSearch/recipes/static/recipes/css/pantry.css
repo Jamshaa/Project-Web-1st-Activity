@@ -1,0 +1,101 @@
+body {
+    background-color: #f7fafc;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.text-gray-600 {
+    color: #718096;
+}
+
+.bg-white {
+    background-color: #ffffff;
+}
+
+.rounded {
+    border-radius: 0.25rem;
+}
+
+.shadow {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.space-x-4> :not(:last-child) {
+    margin-right: 1rem;
+}
+
+.space-y-4> :not(:last-child) {
+    margin-bottom: 1rem;
+}
+
+.border {
+    border: 1px solid #e2e8f0;
+}
+
+.bg-gray-200 {
+    background-color: #edf2f7;
+}
+
+.text-gray-800 {
+    color: #2d3748;
+}
+
+.bg-yellow-200 {
+    background-color: #fefcbf;
+}
+
+.text-yellow-800 {
+    color: #975a16;
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.h-32 {
+    height: 8rem;
+}
+
+.object-cover {
+    object-fit: cover;
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
+
+.bg-black {
+    background-color: #000000;
+}
+
+.text-white {
+    color: #ffffff;
+}
+
+.space-x-2> :not(:last-child) {
+    margin-right: 0.5rem;
+}
