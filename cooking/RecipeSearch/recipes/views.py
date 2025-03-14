@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
 import requests
 import json
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 from .forms import UserRegisterForm, ProfileForm, UserPantryForm
 from .models import Recipe, UserPantry, Ingredient, SavedRecipe
@@ -116,6 +118,14 @@ def update_bio(request):
 @login_required
 def pantry(request):
     pantry_items = UserPantry.objects.filter(user=request.user).select_related('ingredient')
+    today = timezone.now().date()
+    for item in pantry_items:
+        if item.expiration_date < today:
+            item.status = 'Expired'
+        elif item.expiration_date <= today + timedelta(days=3):
+            item.status = 'Expiring Soon'
+        else:
+            item.status = 'Good'
     return render(request, 'recipes/pantry.html', {
         'pantry_items': pantry_items,
         'current_page': 'pantry'
@@ -127,6 +137,7 @@ def add_pantry_item(request):
         ingredient_name = request.POST.get('ingredient_name')
         expiration_date = request.POST.get('expiration_date')
         image = request.FILES.get('image')
+        
         if ingredient_name and expiration_date:
             ingredient, created = Ingredient.objects.get_or_create(name=ingredient_name)
             pantry_item = UserPantry(
