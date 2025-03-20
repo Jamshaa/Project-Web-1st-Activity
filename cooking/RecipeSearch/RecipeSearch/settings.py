@@ -7,6 +7,7 @@ SECRET_KEY = 'tu-clave-secreta-aqui'
 DEBUG = True
 LOGIN_REDIRECT_URL = 'recipes:home'
 LOGOUT_REDIRECT_URL = 'recipes:home'
+LOGIN_URL = 'recipes:login'
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
