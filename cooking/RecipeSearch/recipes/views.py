@@ -98,13 +98,24 @@ def user_logout(request):
 def profile(request):
     profile = request.user.profile 
     if request.method == "POST":
-        form = ProfileForm(request.POST, instance=profile)
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
+            # Update User model fields
+            user = request.user
+            user.first_name = form.cleaned_data['first_name']
+            user.last_name = form.cleaned_data['last_name']
+            user.email = form.cleaned_data['email']
+            user.save()
+            messages.success(request, 'Your profile has been updated!')
             return redirect('recipes:profile')
     else:
         form = ProfileForm(instance=profile)
-    return render(request, 'users/profile.html', {'form': form, 'current_page': 'profile'})
+    return render(request, 'users/profile.html', {
+        'form': form,
+        'current_page': 'profile',
+        'user': request.user
+    })
 
 @csrf_exempt
 def update_bio(request):

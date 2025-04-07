@@ -7,7 +7,10 @@ body {
     margin: 0 auto;
     padding: 20px;
 }
-
+.border-black {
+    border-color: black !important;
+  }
+  
 .text-gray-600 {
     color: #718096;
 }
