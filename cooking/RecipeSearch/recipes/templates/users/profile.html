@@ -1,67 +1,233 @@
 {% extends 'recipes/base.html' %}
+{% load static %}
+
 {% block title %}Profile{% endblock %}
+
+{% block extra_head %}
+<style>
+  .profile-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .profile-photo-container {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+  }
+  .profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .profile-info {
+    margin-bottom: 1.5rem;
+  }
+  .profile-info h1 {
+    margin: 0 0 0.5rem;
+    color: #333;
+    font-size: 1.5rem;
+  }
+  .profile-info .email {
+    color: #666;
+    font-size: 0.9rem;
+  }
+  .edit-btn {
+    background-color: #f8f9fa;
+    color: #333;
+    padding: 0.5rem 2rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  .edit-btn:hover {
+    background-color: #e9ecef;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+  }
+  .modal-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  .button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .button-group button {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .save-btn {
+    background-color: #000;
+    color: white;
+  }
+  .cancel-btn {
+    background-color: #e9ecef;
+    color: #333;
+  }
+  .photo-upload {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .photo-upload img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    object-fit: cover;
+  }
+  .button-container {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  .pantry-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 0.5rem 2rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .pantry-btn:hover {
+    background-color: #218838;
+  }
+</style>
+{% endblock %}
 
 {% block search_container %}{% endblock %}
 
 {% block content %}
 <div class="profile-container">
-  <h2>Your Profile</h2>
-  <div class="bio-container">
-    <label for="bio">Bio:</label>
-    <textarea id="bio" name="bio" disabled>{{ user.profile.bio }}</textarea>
-    <button id="edit-btn" type="button">Edit</button>
+  <div class="profile-photo-container">
+    <img src="{{ user.profile.profile_photo.url }}" alt="Profile photo" class="profile-photo" id="current-photo">
+  </div>
+  <div class="profile-info">
+    <h1>{{ user.get_full_name|default:user.username }}</h1>
+    <div class="email">{{ user.email }}</div>
+  </div>
+  <div class="button-container">
+    <button type="button" class="edit-btn" onclick="openModal()">Edit Profile</button>
+    <a href="{% url 'recipes:pantry' %}" class="pantry-btn">My Pantry</a>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal" id="edit-modal">
+  <div class="modal-content">
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="modal-header">
+        <h2>Edit Profile</h2>
+      </div>
+      
+      <div class="photo-upload">
+        <img src="{{ user.profile.profile_photo.url }}" alt="Profile photo" id="preview-photo">
+        <div>
+          <input type="file" id="id_profile_photo" name="profile_photo" accept="image/*" style="display: none;">
+          <button type="button" onclick="document.getElementById('id_profile_photo').click()" class="edit-btn">
+            Change Photo
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_first_name">Name</label>
+        <input type="text" id="id_first_name" name="first_name" value="{{ form.first_name.value|default:'' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="id_email">Email</label>
+        <input type="email" id="id_email" name="email" value="{{ form.email.value|default:'' }}">
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="save-btn">Save</button>
+      </div>
+    </form>
   </div>
 </div>
 
 <script>
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
+function openModal() {
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+
+// Close modal if clicking outside
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeModal();
   }
+});
 
-  const editBtn = document.getElementById('edit-btn');
-  const bioField = document.getElementById('bio');
-
-  editBtn.addEventListener('click', () => {
-    if (bioField.disabled) {
-      bioField.disabled = false;
-      editBtn.textContent = 'Save Changes';
-      bioField.focus();
-    } else {
-      const bioData = bioField.value;
-      const csrfToken = getCookie('csrftoken');
-      fetch("{% url 'recipes:update_bio' %}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken
-        },
-        body: JSON.stringify({ bio: bioData })
-      })
-      .then(response => {
-        if (response.ok) {
-          bioField.disabled = true;
-          editBtn.textContent = 'Edit';
-          window.location.href = "{% url 'recipes:profile' %}";
-        } else {
-          alert('Error saving bio. Please try again.');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-      });
+// Preview profile photo before upload
+document.getElementById('id_profile_photo').addEventListener('change', function(e) {
+  if (e.target.files && e.target.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('preview-photo').setAttribute('src', e.target.result);
+      document.getElementById('current-photo').setAttribute('src', e.target.result);
     }
-  });
+    reader.readAsDataURL(e.target.files[0]);
+  }
+});
 </script>
 {% endblock %}
+
+

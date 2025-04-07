@@ -1,6 +1,13 @@
 # Use a lightweight Python image
 FROM python:3.11-slim
 
+# Install system dependencies required for Pillow
+RUN apt-get update && apt-get install -y \
+    libjpeg-dev \
+    zlib1g-dev \
+    libpng-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set the working directory inside the container
 WORKDIR /RecipeSearch
 
@@ -11,6 +18,9 @@ COPY cooking/RecipeSearch/pyproject.toml poetry.lock* ./
 RUN pip install poetry && \
     poetry config virtualenvs.create false && \
     poetry install --no-root --no-interaction --no-ansi
+
+# Install Pillow
+RUN pip install Pillow
 
 # Ensure Gunicorn is installed
 RUN poetry run pip install gunicorn
