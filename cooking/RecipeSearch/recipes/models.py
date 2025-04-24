@@ -14,6 +14,7 @@ class Recipe(models.Model):
     image = models.URLField(blank=True)
     instructions = models.TextField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    ingredients = models.ManyToManyField('Ingredient', through='RecipeIngredient')
 
     def __str__(self):
         return self.title
@@ -52,3 +53,15 @@ class SavedRecipe(models.Model):
 
     def __str__(self):
         return f"{self.user.username} saved {self.recipe.title}"
+
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    amount = models.CharField(max_length=100, blank=True)
+    unit = models.CharField(max_length=50, blank=True)
+
+    class Meta:
+        unique_together = ('recipe', 'ingredient')
+
+    def __str__(self):
+        return f"{self.amount} {self.unit} {self.ingredient.name} for {self.recipe.title}"

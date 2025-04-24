@@ -10,9 +10,10 @@ import requests
 import json
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.db.models import Count, Q
 
 from .forms import UserRegisterForm, ProfileForm, UserPantryForm
-from .models import Recipe, UserPantry, Ingredient, SavedRecipe
+from .models import Recipe, UserPantry, Ingredient, SavedRecipe, RecipeIngredient
 
 def home(request):
     return render(request, 'recipes/home.html', {'current_page': 'home'})
@@ -48,25 +49,72 @@ def recipe_search(request):
     query = request.GET.get('query')
     recipes = []
     if query:
-        params = {
+        # First, search for recipes
+        search_params = {
             'query': query,
             'apiKey': settings.SPOONACULAR_API_KEY,
             'number': 10
         }
-        response = requests.get(settings.SPOONACULAR_SEARCH_URL, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            for item in data.get('results', []):
-                recipe, created = Recipe.objects.get_or_create(
-                    spoonacular_id=item['id'],
-                    defaults={
-                        'title': item['title'],
-                        'image': item.get('image', '')
-                    }
-                )
-                recipes.append(recipe)
+        search_response = requests.get(settings.SPOONACULAR_SEARCH_URL, params=search_params)
+        
+        if search_response.status_code == 200:
+            search_data = search_response.json()
+            
+            for item in search_data.get('results', []):
+                # Get detailed recipe information including ingredients
+                detail_url = f"https://api.spoonacular.com/recipes/{item['id']}/information"
+                detail_params = {'apiKey': settings.SPOONACULAR_API_KEY}
+                detail_response = requests.get(detail_url, params=detail_params)
+                
+                if detail_response.status_code == 200:
+                    recipe_data = detail_response.json()
+                    
+                    # Create or update recipe
+                    recipe, created = Recipe.objects.get_or_create(
+                        spoonacular_id=recipe_data['id'],
+                        defaults={
+                            'title': recipe_data['title'],
+                            'image': recipe_data.get('image', ''),
+                            'instructions': recipe_data.get('instructions', '')
+                        }
+                    )
+
+                    # If recipe exists, update its fields
+                    if not created:
+                        recipe.title = recipe_data['title']
+                        recipe.image = recipe_data.get('image', '')
+                        recipe.instructions = recipe_data.get('instructions', '')
+                        recipe.save()
+                    
+                    # Save ingredients
+                    if 'extendedIngredients' in recipe_data:
+                        # Clear existing ingredients for this recipe
+                        RecipeIngredient.objects.filter(recipe=recipe).delete()
+                        
+                        for ing_data in recipe_data['extendedIngredients']:
+                            # Clean ingredient name
+                            ing_name = ing_data['name'].lower().strip()
+                            
+                            # Create or get ingredient
+                            ingredient, _ = Ingredient.objects.get_or_create(
+                                name=ing_name,
+                                defaults={'description': ing_data.get('original', '')}
+                            )
+                            
+                            # Create recipe-ingredient relationship
+                            RecipeIngredient.objects.create(
+                                recipe=recipe,
+                                ingredient=ingredient,
+                                amount=str(ing_data.get('amount', '')),
+                                unit=ing_data.get('unit', '')
+                            )
+                    
+                    recipes.append(recipe)
+                else:
+                    messages.error(request, f"Error fetching details for recipe {item['title']}")
         else:
             messages.error(request, "Error fetching recipes. Please try again later.")
+    
     return render(request, 'recipes/recipe_list.html', {
         'recipes': recipes,
         'query': query,
@@ -75,7 +123,7 @@ def recipe_search(request):
 
 def recipe_detail(request, recipe_id):
     recipe = get_object_or_404(Recipe, spoonacular_id=recipe_id)
-    if not recipe.instructions:
+    if not recipe.instructions or not recipe.recipeingredient_set.exists():
         url = f"https://api.spoonacular.com/recipes/{recipe_id}/information"
         params = {'apiKey': settings.SPOONACULAR_API_KEY}
         response = requests.get(url, params=params)
@@ -83,6 +131,22 @@ def recipe_detail(request, recipe_id):
             data = response.json()
             recipe.instructions = data.get('instructions', '')
             recipe.save()
+            
+            # Save ingredients if they don't exist
+            if 'extendedIngredients' in data:
+                for ing_data in data['extendedIngredients']:
+                    ingredient, _ = Ingredient.objects.get_or_create(
+                        name=ing_data['name'].lower(),
+                        defaults={'description': ing_data.get('original', '')}
+                    )
+                    RecipeIngredient.objects.get_or_create(
+                        recipe=recipe,
+                        ingredient=ingredient,
+                        defaults={
+                            'amount': str(ing_data.get('amount', '')),
+                            'unit': ing_data.get('unit', '')
+                        }
+                    )
         else:
             messages.error(request, "Error fetching recipe details.")
     return render(request, 'recipes/recipe_detail.html', {
@@ -150,17 +214,41 @@ def add_pantry_item(request):
         image = request.FILES.get('image')
         
         if ingredient_name and expiration_date:
-            ingredient, created = Ingredient.objects.get_or_create(name=ingredient_name)
-            pantry_item = UserPantry(
-                user=request.user,
-                ingredient=ingredient,
-                expiration_date=expiration_date
+            # Standardize the ingredient name
+            ingredient_name = standardize_ingredient_name(ingredient_name.lower().strip())
+            
+            ingredient, created = Ingredient.objects.get_or_create(
+                name=ingredient_name,
+                defaults={'description': ''}
             )
-            if image:
-                fs = FileSystemStorage()
-                filename = fs.save(image.name, image)
-                pantry_item.image_url = fs.url(filename)
-            pantry_item.save()
+            
+            # Check if this ingredient is already in the user's pantry
+            existing_item = UserPantry.objects.filter(
+                user=request.user,
+                ingredient=ingredient
+            ).first()
+            
+            if existing_item:
+                # Update existing item's expiration date
+                existing_item.expiration_date = expiration_date
+                if image:
+                    fs = FileSystemStorage()
+                    filename = fs.save(image.name, image)
+                    existing_item.image_url = fs.url(filename)
+                existing_item.save()
+            else:
+                # Create new pantry item
+                pantry_item = UserPantry(
+                    user=request.user,
+                    ingredient=ingredient,
+                    expiration_date=expiration_date
+                )
+                if image:
+                    fs = FileSystemStorage()
+                    filename = fs.save(image.name, image)
+                    pantry_item.image_url = fs.url(filename)
+                pantry_item.save()
+            
             return redirect('recipes:pantry')
     return redirect('recipes:pantry')
 
@@ -195,3 +283,80 @@ def saved_recipes(request):
         'saved_recipes': saved,
         'current_page': 'saved_recipes'
     })
+
+def update_recipe_instructions(recipe):
+    """Fetch and update recipe instructions from Spoonacular API"""
+    if not recipe.instructions:
+        url = f"https://api.spoonacular.com/recipes/{recipe.spoonacular_id}/information"
+        params = {'apiKey': settings.SPOONACULAR_API_KEY}
+        try:
+            response = requests.get(url, params=params)
+            if response.status_code == 200:
+                data = response.json()
+                recipe.instructions = data.get('instructions', '')
+                recipe.save()
+                
+                # Also update ingredients if they don't exist
+                if 'extendedIngredients' in data and not recipe.recipeingredient_set.exists():
+                    for ing_data in data['extendedIngredients']:
+                        ingredient, _ = Ingredient.objects.get_or_create(
+                            name=ing_data['name'].lower(),
+                            defaults={'description': ing_data.get('original', '')}
+                        )
+                        RecipeIngredient.objects.get_or_create(
+                            recipe=recipe,
+                            ingredient=ingredient,
+                            defaults={
+                                'amount': str(ing_data.get('amount', '')),
+                                'unit': ing_data.get('unit', '')
+                            }
+                        )
+                return True
+        except Exception as e:
+            print(f"Error updating recipe {recipe.title}: {str(e)}")
+    return False
+
+@login_required
+def recommend_recipes(request):
+    from datetime import date
+    from django.db.models import Count, F, Q
+    
+    # Get user's pantry ingredients that haven't expired
+    user_pantry_ingredients = UserPantry.objects.filter(
+        user=request.user,
+        expiration_date__gte=date.today()
+    ).select_related('ingredient')
+
+    # Get all recipes from database
+    all_recipes = Recipe.objects.all().prefetch_related('recipeingredient_set__ingredient')
+    
+    # Calculate matches for each recipe
+    recommended_recipes = []
+    for recipe in all_recipes:
+        recipe_ingredients = set(ri.ingredient.name.lower() for ri in recipe.recipeingredient_set.all())
+        user_ingredients = set(item.ingredient.name.lower() for item in user_pantry_ingredients)
+        
+        if recipe_ingredients:  # Only process recipes that have ingredients
+            matched_ingredients = recipe_ingredients.intersection(user_ingredients)
+            match_percentage = (len(matched_ingredients) / len(recipe_ingredients)) * 100
+            
+            if match_percentage >= 50:  # Show recipes with at least 50% match
+                recipe.match_percentage = match_percentage
+                recipe.matched_ingredients = len(matched_ingredients)
+                recipe.total_ingredients = len(recipe_ingredients)
+                recommended_recipes.append(recipe)
+    
+    # Sort by match percentage (highest first)
+    recommended_recipes.sort(key=lambda x: x.match_percentage, reverse=True)
+
+    return render(request, 'recipes/recommendations.html', {
+        'recipes': recommended_recipes,
+        'current_page': 'recommendations'
+    })
+
+def standardize_ingredient_name(name):
+    """Standardize ingredient names by removing plurals and common variations"""
+    # Remove trailing 's' if it exists
+    if name.endswith('s'):
+        name = name[:-1]
+    return name
