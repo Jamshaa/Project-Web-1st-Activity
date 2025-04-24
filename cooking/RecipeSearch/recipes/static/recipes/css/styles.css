@@ -27,26 +27,58 @@ body {
     align-items: center;
     background-color: #00796b;
     padding: 1em;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
 .navbar-left ul,
 .navbar-right ul {
     list-style: none;
     display: flex;
     margin: 0;
     padding: 0;
+    align-items: center;
 }
+
 .navbar-left li,
 .navbar-right li {
-    margin: 0 1em;
+    margin: 0 0.5em;
+    display: flex;
+    align-items: center;
 }
+
 .navbar a {
     color: #fff;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 500;
     font-size: 1em;
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
 }
+
 .navbar a:hover {
-    color: #80cbc4;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.navbar a.btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5em 1em;
+    border-radius: 4px;
+}
+
+.navbar a.btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.navbar a.btn-primary {
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.navbar a.btn-primary:hover {
+    background-color: rgba(255, 255, 255, 0.25);
 }
 
 .search-container {

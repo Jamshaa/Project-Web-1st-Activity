@@ -19,4 +19,5 @@ urlpatterns = [
     path('recipe/<int:recipe_id>/save/', views.save_recipe, name='save_recipe'),
     path('recipe/<int:recipe_id>/remove/', views.remove_saved_recipe, name='remove_saved_recipe'),
     path('saved-recipes/', views.saved_recipes, name='saved_recipes'),  # Nueva ruta
+    path('recommendations/', views.recommend_recipes, name='recommendations'),
 ]
