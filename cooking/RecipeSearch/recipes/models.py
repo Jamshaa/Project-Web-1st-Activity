@@ -51,3 +51,24 @@ class SavedRecipe(models.Model):
 
     def __str__(self):
         return f"{self.user.username} saved {self.recipe.title}"
+
+class RecipeReview(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipe_reviews')
+    rating = models.IntegerField(choices=[
+        (1, '1 Star'),
+        (2, '2 Stars'),
+        (3, '3 Stars'),
+        (4, '4 Stars'),
+        (5, '5 Stars'),
+    ])
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'recipe')  # One review per user per recipe
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username}'s review of {self.recipe.title}"

@@ -17,6 +17,37 @@
     {% endif %}
 </div>
 
+<div class="bg-white rounded shadow p-4 mt-4">
+    <h2 class="text-xl font-semibold mb-4">Reviews</h2>
+    
+    {% if user.is_authenticated %}
+    <form method="POST" action="{% url 'add_review' recipe.id %}">
+        {% csrf_token %}
+        {{ review_form.as_p }}
+        <button type="submit" class="bg-black text-white p-2 rounded">Submit Review</button>
+    </form>
+    {% endif %}
+
+    <div class="space-y-4 mt-4">
+        {% for review in recipe.reviews.all %}
+        <div class="border-b pb-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="font-semibold">{{ review.user.username }}</span>
+                    <span class="text-yellow-500">
+                        {% for i in review.rating|range %}★{% endfor %}
+                    </span>
+                </div>
+                <span class="text-gray-500">{{ review.created_at|date:"M d, Y" }}</span>
+            </div>
+            <p class="mt-2 text-gray-700">{{ review.comment }}</p>
+        </div>
+        {% empty %}
+        <p class="text-center text-gray-500">No reviews yet. Be the first to review!</p>
+        {% endfor %}
+    </div>
+</div>
+
 <script>
 document.getElementById('save-recipe')?.addEventListener('click', function() {
     const recipeId = this.getAttribute('data-recipe-id');

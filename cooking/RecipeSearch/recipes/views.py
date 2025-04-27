@@ -9,7 +9,7 @@ from django.core.files.storage import FileSystemStorage
 import requests
 import json
 
-from .forms import UserRegisterForm, ProfileForm, UserPantryForm
+from .forms import RecipeReviewForm, UserRegisterForm, ProfileForm, UserPantryForm
 from .models import Recipe, UserPantry, Ingredient, SavedRecipe
 
 def home(request):
@@ -173,3 +173,15 @@ def saved_recipes(request):
         'saved_recipes': saved,
         'current_page': 'saved_recipes'
     })
+
+@login_required
+def add_review(request, recipe_id):
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    if request.method == 'POST':
+        form = RecipeReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.recipe = recipe
+            review.save()
+    return redirect('recipe_detail', recipe_id=recipe_id)
