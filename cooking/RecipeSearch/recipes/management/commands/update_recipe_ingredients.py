@@ -3,14 +3,14 @@ from django.conf import settings
 from recipes.models import Recipe, Ingredient, RecipeIngredient
 import requests
 import time
-
+#test 
 class Command(BaseCommand):
     help = 'Updates ingredients for all recipes in the database'
 
     def handle(self, *args, **options):
         recipes = Recipe.objects.all()
         total = recipes.count()
-        
+    
         self.stdout.write(f'Updating ingredients for {total} recipes...')
         
         for index, recipe in enumerate(recipes, 1):
