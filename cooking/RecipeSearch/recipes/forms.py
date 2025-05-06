@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Profile, UserPantry
+from .models import Profile, UserPantry, Recipe
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -29,5 +29,13 @@ class ProfileForm(forms.ModelForm):
 class UserPantryForm(forms.ModelForm):
     class Meta:
         model = UserPantry
-        fields = ['ingredient', 'expiration_date', 'image_url']  
+        fields = ['ingredient', 'expiration_date', 'image_url']
+
+class RecipeForm(forms.ModelForm):
+    class Meta:
+        model = Recipe
+        fields = [
+            'title', 'image', 'image_upload', 'instructions', 'category', 'cuisine',
+            'prep_time', 'cook_time', 'ingredients'
+        ]  
 

@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Count, Q
 
-from .forms import UserRegisterForm, ProfileForm, UserPantryForm
+from .forms import UserRegisterForm, ProfileForm, UserPantryForm, RecipeForm
 from .models import Recipe, UserPantry, Ingredient, SavedRecipe, RecipeIngredient
 
 def home(request):
@@ -360,3 +360,17 @@ def standardize_ingredient_name(name):
     if name.endswith('s'):
         name = name[:-1]
     return name
+
+@login_required
+def create_recipe(request):
+    if request.method == 'POST':
+        form = RecipeForm(request.POST, request.FILES)
+        if form.is_valid():
+            recipe = form.save(commit=False)
+            recipe.user = request.user  # Set the recipe owner
+            recipe.save()
+            form.save_m2m()  # Save many-to-many relationships
+            return redirect('recipes:recipe_detail', recipe_id=recipe.spoonacular_id)
+    else:
+        form = RecipeForm()
+    return render(request, 'recipes/create_recipe.html', {'form': form})
