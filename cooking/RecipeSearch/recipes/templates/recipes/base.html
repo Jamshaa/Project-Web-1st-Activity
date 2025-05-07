@@ -1,12 +1,302 @@
 {% load static %}
 <!DOCTYPE html>
+
+
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Recipe Search{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'recipes/css/styles.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
     {% block extra_head %}{% endblock %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #b2dfdb 0%, #e0f2f1 50%, #ffffff 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-size: 14px;
+        }
+
+        .container {
+            flex: 1;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2em;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #00796b;
+            padding: 1em 2em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+
+        .navbar-left ul,
+        .navbar-right ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+            gap: 1em;
+        }
+
+        .navbar-left li,
+        .navbar-right li {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            color: #fff;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9em;
+            padding: 0.5em 1em;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .navbar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar a.btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .search-container {
+            text-align: center;
+            margin: 2em 0;
+        }
+
+        .search-container form {
+            display: inline-flex;
+            align-items: center;
+            border: 2px solid #00796b;
+            border-radius: 50px;
+            overflow: hidden;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-container input[type="text"] {
+            padding: 1em 1.5em;
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 1em;
+            color: #333;
+        }
+
+        .search-container button {
+            padding: 1em 1.5em;
+            background-color: #00796b;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .search-container button:hover {
+            background-color: #004d40;
+            transform: scale(1.05);
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 0.8em;
+            text-align: center;
+        }
+
+        .home-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            margin: 40px auto;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+        }
+
+        .home-container h1 {
+            color: #00796b;
+            font-size: 2em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+
+        .home-container p {
+            color: #4a4a4a;
+            font-size: 1em;
+            margin-bottom: 2em;
+        }
+
+        .recipe-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .recipe-list li {
+            background: #f8f9fa;
+            border-radius: 5px;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .recipe-list li:hover {
+            transform: scale(1.02);
+        }
+
+        .recipe-list a {
+            display: block;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .recipe-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .recipe-item img {
+            width: 100%;
+            max-width: 250px;
+            object-fit: cover;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        .recipe-info {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .recipe-info h3 {
+            font-size: 1rem;
+            margin: 0;
+            color: #00796b;
+        }
+
+        .footer-bar {
+            background-color: #008883;
+            color: #fff;
+            padding: 20px 0 10px 0;
+            width: 100%;
+            margin-top: 20px;
+            flex-shrink: 0;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            max-width: 1000px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            gap: 30px;
+            padding: 0 20px;
+        }
+
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 150px;
+        }
+
+        .brand-col {
+            min-width: 200px;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .footer-follow {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .footer-social a {
+            color: #fff;
+            font-size: 1.4rem;
+            margin-right: 12px;
+            transition: color 0.2s;
+        }
+
+        .footer-social a:last-child {
+            margin-right: 0;
+        }
+
+        .footer-social a:hover {
+            color: #ffd600;
+        }
+
+        .footer-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .footer-title:hover {
+            color: #ffd600;
+        }
+
+        @media (max-width: 900px) {
+            .footer-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .footer-col,
+            .brand-col {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .footer-logo {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -31,7 +321,6 @@
         </div>
     </nav>
 
-    {# Bloque de búsqueda. En las páginas login, register y profile se sobreescribirá para que quede vacío #}
     {% block search_container %}
     <div class="search-container">
         <form action="{% url 'recipes:recipe_search' %}" method="get">
@@ -49,6 +338,42 @@
         {% endif %}
         {% block content %}{% endblock %}
     </div>
+
+    {% block footer %}
+    <footer class="footer-bar">
+        <div class="footer-container">
+            <div class="footer-col brand-col">
+                <div class="footer-logo">RecipeApp</div>
+                <div class="footer-follow">Follow Us</div>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Dinners</div>
+                <div class="footer-title">Meals</div>
+                <div class="footer-title">Ingredients</div>
+                <div class="footer-title">Occasions</div>
+                <div class="footer-title">Cuisines</div>
+                <div class="footer-title">Kitchen Tips</div>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">About Us</div>
+                <div class="footer-title">Privacy Policy</div>
+                <div class="footer-title">Terms of Service</div>
+                <div class="footer-title">Careers</div>
+                <div class="footer-title">Contact</div>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Editorial Process</div>
+                <div class="footer-title">Product Vetting</div>
+                <div class="footer-title">Advertise</div>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
 
     {% block extra_scripts %}{% endblock %}
 </body>
