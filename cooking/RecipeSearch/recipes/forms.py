@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Profile, UserPantry
+from .models import Profile, UserPantry, Feedback
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -31,3 +31,7 @@ class UserPantryForm(forms.ModelForm):
         model = UserPantry
         fields = ['ingredient', 'expiration_date', 'image_url']  
 
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = ['comment']
