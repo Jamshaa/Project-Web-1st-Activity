@@ -14,6 +14,8 @@ from django.db.models import Count, Q
 
 from .forms import UserRegisterForm, ProfileForm, UserPantryForm
 from .models import Recipe, UserPantry, Ingredient, SavedRecipe, RecipeIngredient
+from .forms import FeedbackForm
+from .models import Feedback
 
 def home(request):
     return render(request, 'recipes/home.html', {'current_page': 'home'})
@@ -360,3 +362,23 @@ def standardize_ingredient_name(name):
     if name.endswith('s'):
         name = name[:-1]
     return name
+
+@login_required
+def feedback(request, recipe_id):
+    recipe = get_object_or_404(Recipe, spoonacular_id=recipe_id)
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.user = request.user
+            feedback.recipe = recipe
+            feedback.save()
+            return redirect('recipes:recipe_detail', recipe_id=recipe_id)
+    else:
+        form = FeedbackForm()
+    return render(request, 'recipes/feedback.html', {
+        'form': form,
+        'recipe': recipe,
+        'current_page': 'feedback'
+    })
+

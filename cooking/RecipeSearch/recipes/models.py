@@ -65,3 +65,12 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f"{self.amount} {self.unit} {self.ingredient.name} for {self.recipe.title}"
+
+class Feedback(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} on {self.recipe.title}"

@@ -10,6 +10,7 @@
     {% endif %}
     <p><strong>Instructions:</strong></p>
     <div>{{ recipe.instructions|safe }}</div>
+    <p><a href="{% url 'recipes:recipe_feedback' recipe.spoonacular_id %}">Leave Feedback</a></p>
     {% if user.is_authenticated %}
         <button id="save-recipe" data-recipe-id="{{ recipe.spoonacular_id }}">Save Recipe</button>
     {% else %}
@@ -35,3 +36,21 @@ document.getElementById('save-recipe')?.addEventListener('click', function() {
 });
 </script>
 {% endblock %}
+
+<h3>Leave Feedback</h3>
+{% if user.is_authenticated %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Feedback</button>
+  </form>
+{% else %}
+  <p><a href="{% url 'recipes:login' %}">Log in</a> to leave feedback.</p>
+{% endif %}
+
+<h3>Feedback</h3>
+{% for fb in feedbacks %}
+  <p><strong>{{ fb.user.username }}</strong>: {{ fb.comment }} <em>on {{ fb.created_at }}</em></p>
+{% empty %}
+  <p>No feedback yet.</p>
+{% endfor %}
