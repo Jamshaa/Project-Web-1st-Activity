@@ -3,46 +3,138 @@
 {% block title %}Your Saved Recipes{% endblock %}
 
 {% block content %}
-    <div class="saved-recipes-container">
-        <h2>Your Saved Recipes</h2>
+<div class="saved-recipes-container">
+    <h2 class="text-center mb-4">Your Saved Recipes</h2>
 
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="message {{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+    {% if messages %}
+        <div class="alert alert-info">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-        {% if saved_recipes %}
-            <div class="recipe-grid">
-                {% for saved in saved_recipes %}
-                    <div class="recipe-card">
-                        <a href="{% url 'recipes:recipe_detail' saved.recipe.spoonacular_id %}">
-                            {% if saved.recipe.image %}
-                                <img src="{{ saved.recipe.image }}" alt="{{ saved.recipe.title }}">
-                            {% else %}
-                                <img src="https://via.placeholder.com/150" alt="Default Image">
-                            {% endif %}
-                            <div class="recipe-info">
-                                <h3>{{ saved.recipe.title }}</h3>
+    {% if saved_recipes %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for saved in saved_recipes %}
+                <div class="col">
+                    <div class="card saved-recipe-card">
+                        <a href="{% url 'recipes:recipe_detail' saved.recipe.spoonacular_id %}" class="text-decoration-none text-dark">
+                            <img src="{{ saved.recipe.image }}" alt="{{ saved.recipe.title }}" class="card-img-top recipe-img">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ saved.recipe.title }}</h5>
                             </div>
                         </a>
-                        <div class="recipe-actions">
-                            <form action="{% url 'recipes:remove_saved_recipe' saved.recipe.spoonacular_id %}" method="post" style="display:inline;">
+                        <div class="card-footer text-center">
+                            <form action="{% url 'recipes:remove_saved_recipe' saved.recipe.spoonacular_id %}" method="post" class="remove-form">
                                 {% csrf_token %}
-                                <button type="submit" class="remove-button">Remove</button>
+                                <button type="submit" class="btn btn-remove w-100">Remove</button>
                             </form>
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="no-recipes-message">
-                <p>No saved recipes yet. Start adding some!</p>
-            </div>
-        {% endif %}
-    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning text-center">
+            No saved recipes yet. Start adding some!
+        </div>
+    {% endif %}
+</div>
+
+<style>
+/* Contenedor principal de las recetas guardadas */
+.saved-recipes-container {
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Estilo para el encabezado */
+.saved-recipes-container h2 {
+    color: #00796b;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 600;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Estilo para las tarjetas de receta */
+.saved-recipe-card {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.saved-recipe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Imagen de las recetas */
+.recipe-img {
+    object-fit: cover;
+    height: 200px;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Estilo para los títulos de las recetas (eliminando subrayado) */
+.saved-recipe-card .card-title {
+    color: #00796b;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-top: 1rem;
+    text-decoration: none;  /* Eliminar subrayado */
+}
+
+/* Estilo para el formulario de eliminación */
+.remove-form {
+    display: inline;
+}
+
+.btn-remove {
+    background-color: #ff5252;
+    border-color: #ff5252;
+    color: white;
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-remove:hover {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+    cursor: pointer;
+}
+
+/* Estilo para el mensaje de alerta si no hay recetas guardadas */
+.alert-warning {
+    background-color: #ffeb3b;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+/* Estilo responsivo */
+@media (max-width: 768px) {
+    .saved-recipes-container {
+        padding: 1.5rem;
+    }
+
+    .saved-recipe-card .card-title {
+        font-size: 1rem;
+    }
+
+    .btn-remove {
+        padding: 8px;
+    }
+}
+</style>
 {% endblock %}

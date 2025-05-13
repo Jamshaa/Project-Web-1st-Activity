@@ -62,9 +62,12 @@ class RecipeIngredient(models.Model):
 
     class Meta:
         unique_together = ('recipe', 'ingredient')
+        verbose_name = "Recipe Ingredient"
+        verbose_name_plural = "Recipe Ingredients"
 
     def __str__(self):
-        return f"{self.amount} {self.unit} {self.ingredient.name} for {self.recipe.title}"
+        amount_unit = f"{self.amount} {self.unit}".strip()
+        return f"{amount_unit} of {self.ingredient.name} for {self.recipe.title}"
 
 class Feedback(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

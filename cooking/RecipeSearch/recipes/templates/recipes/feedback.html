@@ -3,11 +3,111 @@
 {% block title %}Feedback{% endblock %}
 
 {% block content %}
-<h2>Leave Feedback for {{ recipe.title }}</h2>
+<div class="feedback-container">
+    <h2 class="text-center mb-4" style="color: #00796b; font-family: 'Helvetica Neue', Arial, sans-serif;">Recipe Feedback</h2>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit Feedback</button>
-</form>
+    <form method="post" class="form-container">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="rating" class="form-label">Rating (1-5)</label>
+            <input type="number" name="rating" id="rating" min="1" max="5" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+            <label for="comments" class="form-label">Comments</label>
+            <textarea name="comments" id="comments" rows="4" class="form-input" placeholder="Leave your comments here" required></textarea>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-custom btn-lg">Submit Feedback</button>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Estilos generales para la página de feedback */
+.feedback-container {
+    background-color: #f9f9f9;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.feedback-container h2 {
+    font-size: 2rem;
+    color: #00796b;
+    font-weight: bold;
+    margin-bottom: 2rem;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: #00796b;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 121, 107, 0.5);
+}
+
+button.btn-custom {
+    background-color: #00796b;
+    border-color: #00796b;
+    color: white;
+    font-weight: 600;
+    padding: 12px 25px;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    width: 100%;
+}
+
+button.btn-custom:hover {
+    background-color: #004d40;
+    border-color: #004d40;
+    cursor: pointer;
+}
+
+textarea.form-input {
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    .feedback-container {
+        padding: 1.5rem;
+    }
+
+    .form-input {
+        font-size: 0.9rem;
+    }
+
+    button.btn-custom {
+        padding: 10px 20px;
+    }
+}
+</style>
 {% endblock %}
