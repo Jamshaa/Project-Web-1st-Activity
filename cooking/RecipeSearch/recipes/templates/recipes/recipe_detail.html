@@ -3,18 +3,32 @@
 {% block title %}Recipe Detail{% endblock %}
 
 {% block content %}
-<div class="recipe-detail">
-    <h2>{{ recipe.title }}</h2>
+<div class="recipe-detail container mt-5">
+    <h2 class="text-center mb-4" style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #00796b;">{{ recipe.title }}</h2>
+
     {% if recipe.image %}
-        <img src="{{ recipe.image }}" alt="{{ recipe.title }}">
+        <div class="recipe-image text-center mb-4">
+            <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="img-fluid rounded shadow">
+        </div>
     {% endif %}
-    <p><strong>Instructions:</strong></p>
-    <div>{{ recipe.instructions|safe }}</div>
-    <p><a href="{% url 'recipes:recipe_feedback' recipe.spoonacular_id %}">Leave Feedback</a></p>
+
+    <div class="recipe-instructions mb-4">
+        <h4 style="color: #00796b;">Instructions:</h4>
+        <div class="instructions-content" style="font-size: 1.1rem; line-height: 1.6;">
+            {{ recipe.instructions|safe }}
+        </div>
+    </div>
+
+    <div class="recipe-feedback mb-4">
+        <p><a href="{% url 'recipes:recipe_feedback' recipe.spoonacular_id %}" class="btn btn-custom no-border-btn w-100">Leave Feedback</a></p>
+    </div>
+
     {% if user.is_authenticated %}
-        <button id="save-recipe" data-recipe-id="{{ recipe.spoonacular_id }}">Save Recipe</button>
+        <div class="save-recipe text-center mb-4">
+            <button id="save-recipe" data-recipe-id="{{ recipe.spoonacular_id }}" class="btn btn-custom btn-lg w-50">Save Recipe</button>
+        </div>
     {% else %}
-        <p><a href="{% url 'recipes:login' %}">Log in</a> to save this recipe.</p>
+        <p class="text-center"><a href="{% url 'recipes:login' %}" class="btn btn-primary">Log in</a> to save this recipe.</p>
     {% endif %}
 </div>
 
@@ -35,22 +49,100 @@ document.getElementById('save-recipe')?.addEventListener('click', function() {
     .catch(error => console.error('Error:', error));
 });
 </script>
+
+<style>
+/* Estilos para la página de detalles de receta */
+.recipe-detail {
+    background-color: #f9f9f9;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-detail h2 {
+    font-size: 2.5rem;
+    color: #00796b;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.recipe-detail .recipe-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-detail .recipe-instructions {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-detail .recipe-instructions h4 {
+    font-size: 1.5rem;
+    color: #00796b;
+    margin-bottom: 1rem;
+}
+
+.recipe-detail .instructions-content {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+.recipe-detail .recipe-feedback {
+    text-align: center;
+    margin-bottom: 30px; /* Espacio entre los botones */
+}
+
+.recipe-detail .save-recipe {
+    text-align: center;
+    margin-top: 30px; /* Espacio entre los botones */
+}
+
+.recipe-detail .btn-custom {
+    background-color: #00796b;
+    border-color: #00796b;
+    color: white;
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.recipe-detail .btn-custom:hover {
+    background-color: #004d40;
+    border-color: #004d40;
+}
+
+.recipe-detail .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.recipe-detail .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+/* Quitar borde del botón Leave Feedback */
+.recipe-detail .no-border-btn {
+    border: none;
+    background-color: #00796b;
+    color: white;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.recipe-detail .no-border-btn:hover {
+    background-color: #004d40;
+    color: white;
+    cursor: pointer;
+}
+</style>
+
 {% endblock %}
-
-<h3>Leave Feedback</h3>
-{% if user.is_authenticated %}
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit Feedback</button>
-  </form>
-{% else %}
-  <p><a href="{% url 'recipes:login' %}">Log in</a> to leave feedback.</p>
-{% endif %}
-
-<h3>Feedback</h3>
-{% for fb in feedbacks %}
-  <p><strong>{{ fb.user.username }}</strong>: {{ fb.comment }} <em>on {{ fb.created_at }}</em></p>
-{% empty %}
-  <p>No feedback yet.</p>
-{% endfor %}
