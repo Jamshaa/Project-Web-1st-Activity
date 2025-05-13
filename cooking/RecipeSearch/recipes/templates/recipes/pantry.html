@@ -1,4 +1,5 @@
 {% extends 'recipes/base.html' %}
+{% load static %}
 
 {% block extra_head %}
   <link href="{% static 'recipes/css/pantry.css' %}" rel="stylesheet"/>
@@ -7,6 +8,8 @@
 {% endblock %}
 
 {% block title %}My Pantry{% endblock %}
+
+{% block search_container %}{% endblock %}
 
 {% block content %}
   <div class="container mx-auto p-4">
@@ -59,24 +62,133 @@
           <p>Pantry Items Count: {{ pantry_items|length }}</p>
         </div>
       </div>
+
       <div class="w-1/3">
-        <div class="bg-white p-4 rounded shadow">
-          <h2 class="text-xl font-semibold mb-4">Actions</h2>
-          <ul class="space-y-2">
-            <li>
-              <button onclick="openForm()" class="w-full bg-blue-500 text-white p-2 rounded">Add Item to Pantry</button>
-            </li>
-            <li>
-              <button onclick="generateRecipeSuggestions()" class="w-full bg-green-500 text-white p-2 rounded">Get Recipe Suggestions</button>
-            </li>
-            <li>
-              <button onclick="clearPantry()" class="w-full bg-red-500 text-white p-2 rounded">Clear Expired Items</button>
-            </li>
-          </ul>
+        <div class="bg-white rounded shadow p-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Possible Recipes</h2>
+            <button class="text-gray-600"><i class="fas fa-sync-alt"></i></button>
+          </div>
+          <div class="space-y-4">
+            <div class="p-4 border rounded bg-white">
+              <img alt="Image of Simple Fried Rice" class="w-full h-32 object-cover rounded mb-2" src="https://storage.googleapis.com/a1aa/image/IYxqwHl-M-ZqGj2CqvoualdhLIUB2O-Pw5vuwpxJoYo.jpg"/>
+              <h3 class="font-semibold">Simple Fried Rice</h3>
+              <p class="text-gray-600">You have all 7 ingredients</p>
+            </div>
+            <div class="p-4 border rounded bg-white">
+              <img alt="Image of Tomato &amp; Garlic Chicken" class="w-full h-32 object-cover rounded mb-2" src="https://storage.googleapis.com/a1aa/image/Ihvc57h-1pPB3Qz5U21fy6BlfGtjCtrwD8xiVJOT4UY.jpg"/>
+              <h3 class="font-semibold">Tomato &amp; Garlic Chicken</h3>
+              <p class="text-gray-600">You have all 5 ingredients</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="{% static 'recipes/js/pantry.js' %}"></script>
+  <!-- Popup Form -->
+  <div id="popupForm" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white p-6 rounded shadow-lg">
+      <h2 class="text-xl font-bold mb-4">Add Pantry Item</h2>
+      <form method="POST" enctype="multipart/form-data" action="{% url 'recipes:add_pantry_item' %}">
+        {% csrf_token %}
+        <input type="text" name="ingredient_name" placeholder="Ingredient name" required class="border rounded p-2 mb-2 w-full">
+        <input type="date" name="expiration_date" required class="border rounded p-2 mb-2 w-full">
+        <input type="file" name="image" accept="image/*" class="border rounded p-2 mb-2 w-full">
+        <button type="submit" class="bg-black text-white p-2 rounded">Add Item</button>
+        <button type="button" onclick="closeForm()" class="bg-red-500 text-white p-2 rounded ml-2">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function removeItem(itemId) {
+      fetch(`/remove-ingredient/${itemId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          alert(data.message);
+          location.reload();
+        } else {
+          alert("Error: " + data.error);
+        }
+      });
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        let cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          let cookie = cookies[i].trim();
+          if (cookie.startsWith(name + "=")) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    function openForm() {
+      document.getElementById('popupForm').classList.remove('hidden');
+    }
+
+    function closeForm() {
+      document.getElementById('popupForm').classList.add('hidden');
+    }
+
+    function filterItems(filter) {
+      const buttons = {
+        'all': document.getElementById('allItemsBtn'),
+        'expiring': document.getElementById('expiringBtn'),
+        'expired': document.getElementById('expiredBtn'),
+      };
+
+      // Remove black border from all tabs
+      Object.values(buttons).forEach(btn => {
+        btn.classList.remove('border-black');
+        btn.classList.add('border-gray-200');
+      });
+
+      // Add black border to selected tab
+      if (buttons[filter]) {
+        buttons[filter].classList.remove('border-gray-200');
+        buttons[filter].classList.add('border-black');
+      }
+
+      // Update section title
+      const titleMap = {
+        'all': 'All Pantry Items',
+        'expiring': 'Expiring Soon Items',
+        'expired': 'Expired Items'
+      };
+      document.getElementById('itemsTitle').textContent = titleMap[filter];
+
+      // Show/hide pantry items
+      const items = document.querySelectorAll('.pantry-item');
+      items.forEach(item => {
+        const status = item.dataset.status?.trim();
+        if (filter === 'all') {
+          item.style.display = 'flex';
+        } else if (filter === 'expiring' && status === 'Expiring Soon') {
+          item.style.display = 'flex';
+        } else if (filter === 'expired' && status === 'Expired') {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Set initial filter on page load
+    window.onload = function () {
+      filterItems('all');
+    };
+  </script>
 {% endblock %}
