@@ -34,4 +34,4 @@ class UserPantryForm(forms.ModelForm):
 class FeedbackForm(forms.ModelForm):
     class Meta:
         model = Feedback
-        fields = ['comment']
+        fields = ['comment', 'rating']

@@ -405,6 +405,9 @@ def feedback(request, recipe_id):
             feedback.recipe = recipe
             feedback.save()
             return redirect('recipes:recipe_detail', recipe_id=recipe_id)
+        else:
+            print('FEEDBACK FORM ERRORS:', form.errors)
+            messages.error(request, "Feedback form is invalid.")
     else:
         form = FeedbackForm()
     return render(request, 'recipes/feedback.html', {
