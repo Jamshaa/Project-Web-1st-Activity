@@ -73,6 +73,7 @@ class Feedback(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE)
     comment = models.TextField()
+    rating = models.IntegerField(default=5)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

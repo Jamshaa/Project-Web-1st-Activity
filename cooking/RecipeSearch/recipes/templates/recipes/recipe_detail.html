@@ -19,6 +19,19 @@
         </div>
     </div>
 
+    <!-- Feedback Section -->
+    <div class="recipe-feedback-list mb-4">
+        <h4 style="color: #00796b;">Feedback:</h4>
+        {% for feedback in recipe.feedback_set.all %}
+            <div class="feedback border rounded p-2 mb-2">
+                <strong>{{ feedback.user.username }}</strong> rated: {{ feedback.rating }}<br>
+                {{ feedback.comments }}
+            </div>
+        {% empty %}
+            <p>No feedback yet.</p>
+        {% endfor %}
+    </div>
+
     <div class="recipe-feedback mb-4">
         <p><a href="{% url 'recipes:recipe_feedback' recipe.spoonacular_id %}" class="btn btn-custom no-border-btn w-100">Leave Feedback</a></p>
     </div>
