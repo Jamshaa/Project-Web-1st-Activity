@@ -4,45 +4,56 @@
 
 {% block content %}
 <div class="recipe-detail container mt-5">
-    <h2 class="text-center mb-4" style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #00796b;">{{ recipe.title }}</h2>
+    <article vocab="https://schema.org/" typeof="Recipe">
+        <h2 class="text-center mb-4" style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #00796b;" property="name">{{ recipe.title }}</h2>
 
-    {% if recipe.image %}
-        <div class="recipe-image text-center mb-4">
-            <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="img-fluid rounded shadow">
-        </div>
-    {% endif %}
-
-    <div class="recipe-instructions mb-4">
-        <h4 style="color: #00796b;">Instructions:</h4>
-        <div class="instructions-content" style="font-size: 1.1rem; line-height: 1.6;">
-            {{ recipe.instructions|safe }}
-        </div>
-    </div>
-
-    <!-- Feedback Section -->
-    <div class="recipe-feedback-list mb-4">
-        <h4 style="color: #00796b;">Feedback:</h4>
-        {% for feedback in recipe.feedback_set.all %}
-            <div class="feedback border rounded p-2 mb-2">
-                <strong>{{ feedback.user.username }}</strong> rated: {{ feedback.rating }}<br>
-                {{ feedback.comments }}
+        {% if recipe.image %}
+            <div class="recipe-image text-center mb-4">
+                <img property="image" src="{{ recipe.image }}" alt="{{ recipe.title }}" class="img-fluid rounded shadow">
             </div>
-        {% empty %}
-            <p>No feedback yet.</p>
-        {% endfor %}
-    </div>
+        {% endif %}
 
-    <div class="recipe-feedback mb-4">
-        <p><a href="{% url 'recipes:recipe_feedback' recipe.spoonacular_id %}" class="btn btn-custom no-border-btn w-100">Leave Feedback</a></p>
-    </div>
-
-    {% if user.is_authenticated %}
-        <div class="save-recipe text-center mb-4">
-            <button id="save-recipe" data-recipe-id="{{ recipe.spoonacular_id }}" class="btn btn-custom btn-lg w-50">Save Recipe</button>
+        <div class="recipe-instructions mb-4">
+            <h4 style="color: #00796b;">Instructions:</h4>
+            <div class="instructions-content" style="font-size: 1.1rem; line-height: 1.6;" property="recipeInstructions">
+                {{ recipe.instructions|safe }}
+            </div>
         </div>
-    {% else %}
-        <p class="text-center"><a href="{% url 'recipes:login' %}" class="btn btn-primary">Log in</a> to save this recipe.</p>
-    {% endif %}
+
+        <div class="recipe-ingredients mb-4">
+            <h4 style="color: #00796b;">Ingredients:</h4>
+            <ul>
+                {% for ingredient in recipe.extendedIngredients %}
+                <li property="recipeIngredient">{{ ingredient.original }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="recipe-feedback-list mb-4">
+            <h4 style="color: #00796b;">Feedback:</h4>
+            {% for feedback in recipe.feedback_set.all %}
+                <div class="feedback border rounded p-2 mb-2">
+                    <strong>{{ feedback.user.username }}</strong> rated: {{ feedback.rating }}<br>
+                    {{ feedback.comments }}
+                </div>
+            {% empty %}
+                <p>No feedback yet.</p>
+            {% endfor %}
+        </div>
+
+        <div class="recipe-feedback mb-4">
+            <p><a href="{% url 'recipes:recipe_feedback' recipe.spoonacular_id %}" class="btn btn-custom no-border-btn w-100">Leave Feedback</a></p>
+        </div>
+
+        {% if user.is_authenticated %}
+            <div class="save-recipe text-center mb-4">
+                <button id="save-recipe" data-recipe-id="{{ recipe.spoonacular_id }}" class="btn btn-custom btn-lg w-50">Save Recipe</button>
+            </div>
+        {% else %}
+            <p class="text-center"><a href="{% url 'recipes:login' %}" class="btn btn-primary">Log in</a> to save this recipe.</p>
+        {% endif %}
+    </article>
 </div>
 
 <script>
@@ -64,7 +75,7 @@ document.getElementById('save-recipe')?.addEventListener('click', function() {
 </script>
 
 <style>
-/* Estilos para la página de detalles de receta */
+
 .recipe-detail {
     background-color: #f9f9f9;
     padding: 2rem;
@@ -140,7 +151,7 @@ document.getElementById('save-recipe')?.addEventListener('click', function() {
     border-color: #004085;
 }
 
-/* Quitar borde del botón Leave Feedback */
+
 .recipe-detail .no-border-btn {
     border: none;
     background-color: #00796b;
