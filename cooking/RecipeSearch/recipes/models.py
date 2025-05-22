@@ -9,15 +9,22 @@ class Category(models.Model):
         return self.name
 
 class Recipe(models.Model):
-    spoonacular_id = models.IntegerField(unique=True)
-    title = models.CharField(max_length=100)
-    image = models.URLField(blank=True)
+    title = models.CharField(max_length=200)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    published_at = models.DateTimeField(auto_now_add=True)
+    spoonacular_id = models.PositiveIntegerField(unique=True)
+    ingredients = models.TextField(help_text="Un ingrediente por línea", blank=True)
     instructions = models.TextField(blank=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
-    ingredients = models.ManyToManyField('Ingredient', through='RecipeIngredient')
+    image = models.ImageField(upload_to='recipes/', blank=True, null=True)
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['-published_at']
+        verbose_name = "Recipe"
+        verbose_name_plural = "Recipes"
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -71,7 +78,7 @@ class RecipeIngredient(models.Model):
 
 class Feedback(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE)
+    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='reviews')  # <--- AQUÍ
     comment = models.TextField()
     rating = models.IntegerField(default=5)
     created_at = models.DateTimeField(auto_now_add=True)

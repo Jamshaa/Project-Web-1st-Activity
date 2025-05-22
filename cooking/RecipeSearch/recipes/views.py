@@ -135,6 +135,9 @@ def recipe_search(request):
 def recipe_detail(request, recipe_id):
     recipe = get_object_or_404(Recipe, spoonacular_id=recipe_id)
 
+    # Fetch review(s) for RDFa
+    main_review = recipe.reviews.first()
+
     if not recipe.instructions or not recipe.recipeingredient_set.exists():
         try:
             resp = requests.get(
@@ -184,6 +187,7 @@ def recipe_detail(request, recipe_id):
 
     return render(request, 'recipes/recipe_detail.html', {
         'recipe': recipe,
+        'main_review': main_review,
         'current_page': 'recipe_detail'
     })
 
